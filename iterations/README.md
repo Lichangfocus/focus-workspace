@@ -18,6 +18,11 @@
 | [009](009-focus-brand.md) | Focus Workspace 品牌更新 | 名称与 slogan 已更新，字体待确认 |
 | [008](008-desktop-alpha.md) | 可独立启动的桌面预览版 | Alpha.1 已实现，完整 P1 验收进行中 |
 | [007](007-conversation-harness.md) | 第一期对话与 Harness 管理 | 修订 7 已更新，具体交互待 Demo 对齐 |
+| [012](012-model-catalog.md) | 模型目录对齐官方 | alpha.3 交付 |
+| [013](013-harness-compositions.md) | 多套 Harness 设计与模型显示 | 设计由 014/015 落地；alpha.4 交付 |
+| [014](014-mode-design.md) | 统一“模式”概念 | 设计完成，由 015 实现 |
+| [015](015-mode-editor.md) | 模式编辑与受控改进 | alpha.5 交付并完成真实样例验收 |
+| [016](016-open-source-and-upstream.md) | 开源发布与上游跟进机制 | 完成 |
 
 插件补充见[004 首页快捷方式与定时任务小组件](004-home-widgets.md)。
 
@@ -25,4 +30,4 @@
 
 应用开发遵循[方案确认记录](../product/approval.md)，代码、配置与数据恢复遵循[版本约定](versioning.md)。
 
-v0.1 完成前仅在本地维护：[待办清单](backlog.md)记录任务状态，各迭代文档保存目标与验收结论。GitHub 上传由用户在 v0.1 之后决定。
+[待办清单](backlog.md)记录任务状态，各迭代文档保存目标与验收结论。仓库已公开托管于 GitHub，规则见 [AGENTS.md](../AGENTS.md)。

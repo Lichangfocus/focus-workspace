@@ -1,0 +1,9 @@
+Focus Workspace
+Copyright 2026 Lichangfocus and Focus Workspace contributors
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Focus Workspace depends on and redistributes DeepSeek Harness
+(https://github.com/deepseek-ai/deepseek-harness), Copyright (c) 2026 DeepSeek,
+licensed under the MIT License. Third-party packages keep their own licenses;
+the desktop package ships them under node_modules/ with their license files.
