@@ -8,7 +8,6 @@
 
 | ID | 功能 | 阶段 | 状态 | 完成条件 |
 | --- | --- | --- | --- | --- |
-| CAP-01.2 | 本地 stdio MCP | P1 | 见[能力装配](harness-capabilities.md#功能项与进度) | P1 基础由能力装配维护 |
 | CONNECT-01 | 远程 MCP 与凭证管理（修订 13 新增） | P3 | 待细化 | HTTP/OAuth 接入实际调用成功，凭证只保存引用 |
 | CONNECT-02 | 常用服务连接器（修订 13 新增） | P3 | 待细化 | 第一批连接器真实调用成功，状态可区分 |
 | CONNECT-03 | 电脑与浏览器操作（修订 13 新增） | P3 | 待细化 | 复用 DSH computer-use/browser-use，高风险操作审批 |
@@ -20,15 +19,13 @@
 
 让 Agent 真实地操作用户的电脑、浏览器、常用服务和数据，而不是停留在对话里。连接能力是 Harness 的一部分：每个连接作为能力资产被模式装配，状态在 Harness 现状中统一展示，调用记录进入会话日志。
 
-## 功能范围
+## 功能说明
 
-| ID | 功能 | 说明 |
-| --- | --- | --- |
-| CAP-01.2 | 本地 stdio MCP | P1 基础，见[能力装配](harness-capabilities.md#mcp-管理cap-012)；DSH 自带的 shell、文件和网页工具同属基础 |
-| CONNECT-01 | 远程 MCP 与凭证管理 | HTTP 传输与 OAuth 授权；凭证只保存引用，复用 DSH credentials 能力 |
-| CONNECT-02 | 常用服务连接器 | 飞书、微信、邮件、日历、GitHub 等；优先复用 MCP 生态和 DSH 插件，不自写协议客户端 |
-| CONNECT-03 | 电脑与浏览器操作 | 复用 DSH computer-use、browser-use；高风险操作沿用审批 |
-| CONNECT-04 | 远程入口 | 从手机或 IM 发起任务、接收结果与审批；与 PROACTIVE-03 共用结果通道 |
+- **CAP-01.2 本地 stdio MCP**：P1 基础，见[能力装配](harness-capabilities.md#mcp-管理cap-012)；DSH 自带的 shell、文件和网页工具同属基础
+- **CONNECT-01 远程 MCP 与凭证管理**：HTTP 传输与 OAuth 授权；凭证只保存引用，复用 DSH credentials 能力
+- **CONNECT-02 常用服务连接器**：飞书、微信、邮件、日历、GitHub 等；优先复用 MCP 生态和 DSH 插件，不自写协议客户端
+- **CONNECT-03 电脑与浏览器操作**：复用 DSH computer-use、browser-use；高风险操作沿用审批
+- **CONNECT-04 远程入口**：从手机或 IM 发起任务、接收结果与审批；与 PROACTIVE-03 共用结果通道
 
 ## 原则
 
