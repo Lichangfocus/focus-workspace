@@ -1,5 +1,62 @@
 # DeepSeek Harness 接入记录
 
+本页是 DSH 上游跟进的唯一流程入口，同时记录每次升级的结论。规则摘要见 [AGENTS.md](../AGENTS.md#上游跟进)。
+
+## 跟进机制
+
+### 原则
+
+1. **依赖，不 fork。** 通过 npm 精确锁定 `@deepseek-ai/dsh*`，所有 `@deepseek-ai/*` 包使用同一版本号；不修改上游源码。本地 DSH 克隆只用于阅读源码和查证，不参与构建。
+2. **只跟发布，不追提交。** 上游 master 日均数百提交，只评估 npm / GitHub Release 发布。默认跟 `next`（rc）渠道；`alpha` 只在需要某个具体修复或能力时评估。
+3. **稳定线与升级线分开。** `main` 始终锁定已验证版本；升级在 `upgrade/dsh-<版本>` 分支完成，验证全部通过后才合并。
+4. **只用文档化扩展点。** 插件、preset、profile overlay、Client slot、SDK；依赖内部实现时必须登记到下方「本地补丁」表。
+5. **上游有的就用上游。** 上游发布了与本产品重叠的通用能力，优先迁移过去并删除自有实现，把精力留给上游不会做的部分（自进化闭环、账号化个人经验）。
+
+### 发现
+
+- 每日定时：`node engineering/scripts/upstream-watch.mjs install` 安装 macOS launchd 任务，每天 09:30 运行检查（错过时在唤醒后补跑），发现新版本发系统通知。`status` 查看、`uninstall` 移除。
+- 任务开始：Agent 运行 `node engineering/scripts/check-upstream.mjs --max-age 12h`，12 小时内复用缓存结果。
+- 结果保存在 `.local/upstream/last-check.json`（不入库），日志在 `.local/upstream/launchd.log`。
+
+### 评估（发现新版本后）
+
+阅读从当前锁定版本到目标版本的 Release 说明，逐项回答并写入下方「升级记录」：
+
+| 检查项 | 为什么 |
+| --- | --- |
+| Session 格式版本是否变化 | 升级会单向迁移账号内会话数据，旧版本无法再读取 |
+| 已用扩展点、Client slot、preset/profile 字段是否变化 | 决定插件和编译逻辑需要改什么 |
+| 「本地补丁」对应问题是否已修复 | 能删的补丁优先删 |
+| 是否出现与本产品功能重叠的新能力 | 适用原则 5 |
+| 是否有安全修复 | 安全修复提高升级优先级 |
+
+### 升级验证（`upgrade/dsh-<版本>` 分支）
+
+1. 退出应用，备份账号数据目录（见[桌面 README](apps/desktop/README.md#本地数据和恢复)）。
+2. 将 `engineering/apps/desktop/package.json` 中全部 `@deepseek-ai/*` 改为同一目标版本，`npm install` 更新锁文件。
+3. 复核「本地补丁」表：构建和隔离启动会自动应用补丁，版本或代码锚点不符时停止；先判断补丁是否仍需要，再更新或删除。
+4. `npm test`、`npm run typecheck`、`npm run build`。
+5. `npm run dev:host` + `npm run verify:host`（隔离账号，不调用付费模型）。
+6. 用真实模型跑一次最小任务，覆盖对话、工具调用、审批和模式发布。
+7. `npm run package` 打包，在副本账号上启动，确认旧会话可读。
+8. 更新本页「当前锁定」与「升级记录」，合并后打 `checkpoint/dsh-<版本>` 标签。
+
+任一步失败：保留分支，记录失败原因与阻塞项，`main` 不变。
+
+### 本地补丁
+
+| 补丁 | 原因 | 上游跟进 | 每次升级 |
+| --- | --- | --- | --- |
+| `apps/desktop/scripts/patch-creator.mjs` | 固定版多个创造 preset 重复注册 Host 检查 provider | 待提交上游 issue | 检查是否已修复；已修复则删除补丁与 `inspect-leases.mjs` |
+| `apps/desktop/scripts/brand-upstream.mjs` | 上游 Client 未开放首页标语 slot | 待提交上游 issue/PR | 检查是否已开放 slot |
+
+### 升级记录
+
+| 日期 | 从 → 到 | 结论 | 记录 |
+| --- | --- | --- | --- |
+| 2026-09-20 | — → 0.1.6-alpha.2 | 首次接入 | [迭代 008](../iterations/008-desktop-alpha.md) |
+| 2026-09-25 | 0.1.6-alpha.2 → 0.1.7-rc.2 | 待评估：上游 Session 格式已升至 v4；新增 profile YAML 声明 Agent 组合（#4569）等与模式管理相关的变化 | TASK-030 |
+
 ## 当前源码参考
 
 - 上游仓库：[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness)。
@@ -10,7 +67,7 @@
 - 提交日期：2026-09-17 21:19:19 +08:00。
 - 原参考提交：`b150a551b8d465e31e418e1b2eaf5e79bbb7d28e`，标签 `dsh-v0.1.1-rc.2`，首次记录于 2026-09-10。
 
-此次获取远端与标签后，以 fast-forward 和 autostash 更新，前进 4,912 个提交。更新前保留了本地 HEAD、AGENTS.md 和未提交差异；更新后个人知识库区块仍保留，父仓库唯一已跟踪的本地修改仍为 AGENTS.md 的 27 行追加。备份位于 `custom-projects/.backups/`：`upstream-head-before-update-20260920.txt`、`upstream-AGENTS-before-update-20260920.md`、`upstream-local-before-update-20260920.patch`。
+（历史记录）此次获取远端与标签后，以 fast-forward 和 autostash 更新，前进 4,912 个提交。更新前保留了本地 HEAD、AGENTS.md 和未提交差异；更新后个人知识库区块仍保留，父仓库唯一已跟踪的本地修改仍为 AGENTS.md 的 27 行追加。备份位于 `custom-projects/.backups/`：`upstream-head-before-update-20260920.txt`、`upstream-AGENTS-before-update-20260920.md`、`upstream-local-before-update-20260920.patch`。
 
 上述标签是本次拉取结果，不表示生产稳定版，也不是本产品已验证的依赖。产品独立仓库及 Demo 不属于这次上游快进范围。
 
