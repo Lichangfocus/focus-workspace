@@ -1,0 +1,55 @@
+{
+  "name": "dsh-workbench",
+  "productName": "Focus Workspace",
+  "version": "0.1.0-alpha.5",
+  "private": true,
+  "type": "module",
+  "main": "electron/main.mjs",
+  "description": "个人对话与 Harness 工作台",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "start": "npm run build && electron .",
+    "test": "node --test tests/*.test.mjs",
+    "package": "node scripts/bundle-runtime.mjs && npm run build && electron-builder --mac dir --arm64",
+    "typecheck": "tsc --noEmit",
+    "dev:host": "node scripts/dev-host.mjs",
+    "verify:host": "node scripts/verify-host.mjs"
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh": "0.1.6-alpha.2",
+    "@deepseek-ai/dsh-mcp-client": "0.1.6-alpha.2",
+    "yaml": "2.8.2",
+    "zod": "4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "24.3.0",
+    "@types/react": "18.3.28",
+    "electron": "43.2.0",
+    "electron-builder": "26.15.3",
+    "esbuild": "0.25.12",
+    "react": "18.3.1",
+    "typescript": "6.0.3"
+  },
+  "build": {
+    "appId": "local.dsh.workbench",
+    "productName": "Focus Workspace",
+    "asar": false,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "plugin/**/*",
+      "package.json",
+      "node_modules/**/*",
+      "runtime/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "identity": null
+    },
+    "electronDist": "node_modules/electron/dist",
+    "npmRebuild": false
+  },
+  "packageManager": "npm@11.11.0"
+}
