@@ -57,7 +57,8 @@ TASK-026/028 设计已经确认并通过 TASK-029 落地；TASK-021/022/023 已�
 
 | 编号 | 任务 | 验收标准 / 关联功能 | 状态 |
 | --- | --- | --- | --- |
-| TASK-030 | 评估并升级 DSH 至 0.1.7 | 按[跟进流程](../engineering/upstream.md#跟进机制)评估 Session v4 迁移、扩展点变化、本地补丁与重叠能力；在 `upgrade/dsh-0.1.7-rc.2` 分支完成升级验证清单 | 待办 |
+| TASK-030 | 评估并升级 DSH 至 0.1.7 | 评估已完成（[结论](../engineering/upstream.md#017-rc2-评估2026-09-25)）；升级并重构模式发布为迭代 018 第 1 步 | 评估完成，升级待确认 |
 | TASK-031 | 上游检查与每日定时 | 检查脚本、launchd 每日任务、任务开始检查规则 | 完成，见 [016](016-open-source-and-upstream.md) |
 | TASK-032 | 产品方案修订 13 | 定位与文档结构已确认；新增功能项、分期与验收规则待确认，见 [017](017-outline-revision-13.md) | 进行中 |
-| TASK-033 | 本地补丁上游化 | `patch-creator`、首页标语 slot 各提交一个上游 issue/PR | 待办 |
+| TASK-033 | 本地补丁上游化 | `patch-creator` 已由上游 #4742 修复；首页标语 slot 提交一个上游 issue/PR | 待办 |
+| TASK-034 | Harness P1 开发计划 | 五步顺序、每步交付与验收，见 [018](018-harness-p1-plan.md) | 待确认 |

@@ -47,15 +47,31 @@
 
 | 补丁 | 原因 | 上游跟进 | 每次升级 |
 | --- | --- | --- | --- |
-| `apps/desktop/scripts/patch-creator.mjs` | 固定版多个创造 preset 重复注册 Host 检查 provider | 待提交上游 issue | 检查是否已修复；已修复则删除补丁与 `inspect-leases.mjs` |
-| `apps/desktop/scripts/brand-upstream.mjs` | 上游 Client 未开放首页标语 slot | 待提交上游 issue/PR | 检查是否已开放 slot |
+| `apps/desktop/scripts/patch-creator.mjs` | 固定版多个创造 preset 重复注册 Host 检查 provider | 上游 #4742 已修复（0.1.7） | 升级到 0.1.7 时删除补丁与 `inspect-leases.mjs` |
+| `apps/desktop/scripts/brand-upstream.mjs` | 上游 Client 未开放首页标语 slot | 0.1.7 仍未开放，待提交上游 issue/PR | 升级时更新版本检查并确认两处文案仍可替换 |
 
 ### 升级记录
 
 | 日期 | 从 → 到 | 结论 | 记录 |
 | --- | --- | --- | --- |
 | 2026-09-20 | — → 0.1.6-alpha.2 | 首次接入 | [迭代 008](../iterations/008-desktop-alpha.md) |
-| 2026-09-25 | 0.1.6-alpha.2 → 0.1.7-rc.2 | 待评估：上游 Session 格式已升至 v4；新增 profile YAML 声明 Agent 组合（#4569）等与模式管理相关的变化 | TASK-030 |
+| 2026-09-25 | 0.1.6-alpha.2 → 0.1.7-rc.2 | 已评估，**有破坏性变化**，升级需重构模式发布；计划见[迭代 018](../iterations/018-harness-p1-plan.md) | [评估](#017-rc2-评估2026-09-25) |
+
+## 0.1.7-rc.2 评估（2026-09-25）
+
+依据：本地上游克隆中 `dsh-v0.1.6-alpha.2..dsh-v0.1.7-rc.2` 的源码与迁移说明，只读核查，未构建运行。
+
+| 检查项 | 结论 |
+| --- | --- |
+| Session 格式 | v3 → v4（`docs/persistence-changes/2026-09-16-session-format-v4.md`）。打开时自动迁移，写入 `session.v4.jsonl` 并保留 v3 文件；v3 读取器拒绝 v4，**升级对用户会话数据是单向的**。工具结果改为 `role: 'tool'` 消息，错误标记移到 `message.isError` |
+| 所用扩展点 | **破坏性**：`agent-presets` 包被删除（#4569），由 `agent-preset-registry` 与 `agent-preset` 取代；preset 改为在 profile YAML 中声明或运行时 `agentPresets.register(definition)` 注册，不再扫描目录。产品依赖的 `copy`、`resolve().path`、`remove` 已移除；`settings.get` 已移除，默认 preset 设置改为 `agent-preset-registry.selectedDefault`，`modeSelectionEnabled` 取消 |
+| preset 版本 | 注册表的修订只在内存中；重启后按 preset id 解析，缺失的 id 会被拒绝。产品必须自己持久化每个版本定义，并在启动时、会话恢复前重新注册 |
+| 本地补丁 | 创造模式重复注册已由 #4742 修复；首页标语 slot 仍未开放 |
+| 重叠能力 | 运行时 `register()` 可直接作为模式发布和按需组合的实现基础；`sessionController.projections` 提供 token、上下文占用与构成等投影，可用于观测与上下文可视；`compositionInventory()` 可用于实际装配视图 |
+| 仍缺的能力 | 创建会话时仍不能指定模型与权限；没有按步骤返回完整模型请求的公开接口 |
+| 安全修复 | 本次未发现需要紧急升级的安全修复 |
+
+未验证项：各 preset 实际工具数量；`register()` 按调用方 `baseUrl` 解析子插件包名在打包应用中是否正常；大量产品 preset 出现在官方选择器中的体验；构建后 Client 文案替换是否仍可行。
 
 ## 当前源码参考
 

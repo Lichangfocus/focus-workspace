@@ -1,6 +1,6 @@
 # DSH 内置模式：行为、原理与使用场景
 
-> 所属：[产品大纲](../outline.md) · 支柱一「灵活且自进化的 Harness」（参考资料） · 功能 ID：HARNESS-04.x 的上游依据 · 阶段与状态以[大纲功能清单](../outline.md#七功能清单)为准。
+> 所属：[产品大纲](../outline.md) · 支柱一「灵活且自进化的 Harness」（参考资料） · 功能 ID：HARNESS-04.x 的上游依据 · 功能项与进度见[模式管理](harness-modes.md#功能项与进度)。
 
 核查基线：本产品安装的 `@deepseek-ai/dsh-agent-presets@0.1.6-alpha.2`，2026-09-23。这里说明该固定版本的实际装配，不将上游未来能力或产品设计当作已交付功能。自定义模式设计见[模式管理方案](harness-modes.md)。
 

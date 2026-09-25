@@ -31,7 +31,7 @@
 | 运行观测 | 查看某次会话实际使用的模式版本、模型 ID、工具结果和结束原因 |
 | 受控自进化 | 记录反馈 → Agent 生成配置候选 → 独立试跑 → 人工对照证据 → 采用发布 → 可回退；不自动采用 |
 
-规划中的能力（首页插件桌面、定时任务小组件、知识库、Agent 协同等）及分期见[产品大纲](product/outline.md)。
+规划中的能力（首页插件桌面、定时任务小组件、知识库、Agent 协同等）及进度见[产品大纲](product/outline.md)。
 
 ## 快速开始（从源码运行）
 
@@ -64,7 +64,7 @@ DSH 迭代很快。本项目通过 npm 精确锁定 DSH 版本，只跟官方发
 ## 项目结构
 
 ```text
-product/       产品文档：outline.md 大纲（定位、支柱、功能清单、分期）+ features/ 功能设计
+product/       产品文档：outline.md 大纲（定位、支柱、模块进度、分期）+ features/ 功能设计（功能项与细节）
 iterations/    迭代计划、待办与验收记录
 engineering/   工程实现：apps/desktop 桌面应用、scripts 工程脚本、tests 测试、upstream.md 上游记录
 demo/          早期对齐用交互 Demo 与设计稿（历史参考）
