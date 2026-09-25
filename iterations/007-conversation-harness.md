@@ -6,7 +6,7 @@
 
 ## 交付
 
-新增[第一期设计](../product/harness-management.md)，定义对话与 Harness 两个入口，Tool/Skill/MCP 装配、可验证的现状、配置校验应用、对话版本关联与手动回退。同步[功能清单](../product/features.md)、主方案、页面行为、Demo 映射、确认记录、待办与工程实施顺序。
+新增[第一期设计](../product/features/harness-capabilities.md)，定义对话与 Harness 两个入口，Tool/Skill/MCP 装配、可验证的现状、配置校验应用、对话版本关联与手动回退。同步[功能清单](../product/outline.md)、主方案、页面行为、Demo 映射、确认记录、待办与工程实施顺序。
 
 首页插件桌面、小组件、知识库、协同与自动优化/A-B 不进入 P1。现有 Subagent 预设装配作为首期细化建议，复杂编辑和高级依赖管理保留后续；不把“等”扩展为任意装配能力均须首期实现。
 

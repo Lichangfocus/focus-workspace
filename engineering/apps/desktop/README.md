@@ -50,7 +50,7 @@ npm run dev:host
 npm run verify:host
 ```
 
-验证仅操作 `.local/test-account`，创建测试会话、Skill 和 MCP 服务，不调用外部模型。用 `DSH_WORKBENCH_HOME` 可指定桌面测试数据目录。产品实现和验收状态见 [迭代 008](../../../iterations/008-desktop-alpha.md)；完整需求仍以 [功能清单](../../../product/features.md) 为准。
+验证仅操作 `.local/test-account`，创建测试会话、Skill 和 MCP 服务，不调用外部模型。用 `DSH_WORKBENCH_HOME` 可指定桌面测试数据目录。产品实现和验收状态见 [迭代 008](../../../iterations/008-desktop-alpha.md)；完整需求仍以 [功能清单](../../../product/outline.md) 为准。
 
 品牌变更见[迭代 009](../../../iterations/009-focus-brand.md)。构建脚本对固定版上游 Client 的两种语言首页标语进行可重复替换；DSH 当前只开放图标 slot，未开放 headline slot，升级时需复核该适配。其他品牌显示通过产品插件完成，不修改父级上游源码。
 

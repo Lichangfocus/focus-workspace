@@ -4,11 +4,11 @@
 
 ## 本轮交付
 
-形成[产品方案](../product/brief.md)、[页面行为](../product/experience.md)、[账号与数据](../product/data-ownership.md)、[工程接入建议](../engineering/architecture-proposal.md)和[版本约定](versioning.md)。本轮不写应用代码。
+形成[产品方案](../product/outline.md)、[页面行为](../product/outline.md)、[账号与数据](../product/features/account-data.md)、[工程接入建议](../engineering/architecture-proposal.md)和[版本约定](versioning.md)。本轮不写应用代码。
 
 ## 当前分期入口
 
-2026-09-20，用户明确先专注对话，旧版把五个模块都纳入 v0.1 的建议已被替代。2026-09-20 后续补充已将 Harness 装配和现状可视化纳入第一期，见[007](007-conversation-harness.md)。当前范围、阶段与完成条件统一见[功能清单](../product/features.md)，本轮修改见[006 · 功能分区与对话优先](006-conversation-first.md)。迭代文档编号是工作记录序号，P1～P6 是交付阶段，两者独立，不能把历史记录编号当作未来开发顺序。
+2026-09-20，用户明确先专注对话，旧版把五个模块都纳入 v0.1 的建议已被替代。2026-09-20 后续补充已将 Harness 装配和现状可视化纳入第一期，见[007](007-conversation-harness.md)。当前范围、阶段与完成条件统一见[功能清单](../product/outline.md)，本轮修改见[006 · 功能分区与对话优先](006-conversation-first.md)。迭代文档编号是工作记录序号，P1～P6 是交付阶段，两者独立，不能把历史记录编号当作未来开发顺序。
 
 各阶段只需对齐该阶段方案与 Demo，再记录开发授权；不要求先确认全部长期规划。执行任务见[待办](backlog.md)。
 

@@ -62,7 +62,7 @@
 
 ## 整合方案修订 9（2026-09-20）
 
-以修订 8 归档为修改前检查点，修改后保存 `custom-projects/.backups/focus-workspace-revision9-20260920.tar.gz` 及 SHA-256。此次仅整合文档，桌面版本仍为 alpha.2，新增能力未实现。统一审阅入口为[产品方案](../product/brief.md)，用户确认后继续开发，见[011](011-integrated-proposal.md)。
+以修订 8 归档为修改前检查点，修改后保存 `custom-projects/.backups/focus-workspace-revision9-20260920.tar.gz` 及 SHA-256。此次仅整合文档，桌面版本仍为 alpha.2，新增能力未实现。统一审阅入口为[产品方案](../product/outline.md)，用户确认后继续开发，见[011](011-integrated-proposal.md)。
 
 ## 模型目录 alpha.3（2026-09-23）
 

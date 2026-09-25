@@ -1,8 +1,8 @@
 # 支撑好用与自进化的底层设计
 
-统一产品功能与技术架构见[完整产品方案（修订 9）](../product/brief.md)。本页作为工程详细说明与研究依据；当前实现、待开发能力及开工范围以整合版为准。
+统一产品功能与技术架构见[完整产品方案（修订 9）](../product/outline.md)。本页作为工程详细说明与研究依据；当前实现、待开发能力及开工范围以整合版为准。
 
-依据[产品方案修订 8](../product/brief.md)与[自进化定义](../product/self-evolution.md)。本页是待实现设计，基于本地固定 DSH 0.1.6-alpha.2 参考源码核查；当前桌面 alpha.2 的实现证据见[008](../iterations/008-desktop-alpha.md)。本轮不新增运行时代码。
+依据[产品方案修订 8](../product/outline.md)与[自进化定义](../product/features/self-evolution.md)。本页是待实现设计，基于本地固定 DSH 0.1.6-alpha.2 参考源码核查；当前桌面 alpha.2 的实现证据见[008](../iterations/008-desktop-alpha.md)。本轮不新增运行时代码。
 
 ## DSH 提供什么，产品还需补什么
 
@@ -59,7 +59,7 @@ HarnessRevision 是产品的整体运行依据。即使 alpha.2 只复制 preset
 3. 以一个本地 Skill 为改进对象，复用当前不可变配置版本机制，增加候选、差异和独立验证记录。
 4. 增加采用前冲突检查、采用记录和回退原因，完成一条实际闭环；再扩展批量评估、更多进化对象及自动化。
 
-alpha.2 已有独立账号目录、官方执行日志、Skill 快照、preset 应用与手动回退。alpha.5 在此基础上增加模式内反馈、配置候选、比较证据与采用记录；具体已验收范围见[清单](../product/features.md)。
+alpha.2 已有独立账号目录、官方执行日志、Skill 快照、preset 应用与手动回退。alpha.5 在此基础上增加模式内反馈、配置候选、比较证据与采用记录；具体已验收范围见[清单](../product/outline.md)。
 
 ## alpha.5 落地
 

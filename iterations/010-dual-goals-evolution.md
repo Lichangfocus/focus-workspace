@@ -4,7 +4,7 @@
 
 ## 方案变化
 
-[主方案](../product/brief.md)更新为修订 8，将两个目标、相互作用和判断指标放在产品定位中。[自进化设计](../product/self-evolution.md)定义改进对象、来源证据、候选、最小验证、采用回退和分期；[底层设计](../engineering/evolution-foundation.md)将其落实到 DSH 扩展机制、实际版本、任务反馈及评估对象。
+[主方案](../product/outline.md)更新为修订 8，将两个目标、相互作用和判断指标放在产品定位中。[自进化设计](../product/features/self-evolution.md)定义改进对象、来源证据、候选、最小验证、采用回退和分期；[底层设计](../engineering/evolution-foundation.md)将其落实到 DSH 扩展机制、实际版本、任务反馈及评估对象。
 
 P1 原有对话与 Harness 入口保持，新增 EVOLVE-01～04：任务证据/反馈、Skill 候选、最小比较验证及采用记录。先让 Agent 基于一次纠正生成一个候选，验证后由用户采用；完整批量评测和限定范围自动采用由 P5 承接。自进化不再整体后置到 P5，知识库和桌面扩展也不成为其前置依赖。
 

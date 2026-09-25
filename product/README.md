@@ -1,9 +1,19 @@
-# 产品方案
+# 产品文档
 
-[产品定义](brief.md)是产品方向的统一入口。先明确谁在什么场景下遇到什么问题，再定义最小闭环与成功指标。
+产品文档分两层，思路与设计分开维护：
 
-当前方案为个人 Agent 桌面工作台 0.1-draft，修订 7，第一期专注对话与 Harness 管理；[功能清单与分期](features.md)统一管理完整范围、阶段、状态和完成条件。配套[页面行为](experience.md)、[账号归属](data-ownership.md)、[参考记录](references.md)及[确认记录](approval.md)。用户已授权制作对齐 Demo，通过[对应表](demo-map.md)联动需求与交互；方案及 Demo 确认后启动正式工程。
+```text
+product/
+├── outline.md          第一层 · 产品大纲：定位、用户、六大支柱、P1 重点、验收场景、功能清单、分期
+├── features/           第二层 · 功能设计：每个模块一份，持续细化具体行为（索引见 features/README.md）
+├── approval.md         确认记录：每次用户确认的范围，工程开工的依据
+├── demo-map.md         方案与历史 Demo 的对应表
+└── references.md       产品与技术参考
+```
 
-后续按需要增加用户调研、流程设计和具体功能方案。事实附来源，假设附验证方式；尚未确定的内容保留为待定。功能状态更新到功能清单，执行任务和验收证据放在[迭代管理](../iterations/README.md)。
+## 怎么用
 
-[第一期设计](harness-management.md)细化 Tool、Skill、MCP 装配、真实 Harness 状态、对话联动及配置应用回退。
+- **调整方向、增删功能**：改 [outline.md](outline.md)。新功能先在功能清单分配 ID、阶段和状态。
+- **细化某个功能怎么做**：改 [features/](features/README.md) 下对应文档；阶段和状态不在这里重复写。
+- **确认后开工**：在 [approval.md](approval.md) 记录确认范围，再建迭代文档与工程任务；链路见 [AGENTS.md](../AGENTS.md#方案先行产品与工程的关联)。
+- **技术架构**：在[工程架构](../engineering/architecture.md)维护，与大纲第四节“为什么以 DSH 为底座”对应。

@@ -4,7 +4,7 @@
 
 ## 开始每个任务
 
-1. 读 [README](README.md)、[产品方案](product/brief.md)、[功能清单](product/features.md)和[待办](iterations/backlog.md)中与任务相关的部分。
+1. 读 [README](README.md)、[产品大纲](product/outline.md)（含功能清单）、相关的[功能设计](product/features/README.md)和[待办](iterations/backlog.md)。
 2. 运行 `node engineering/scripts/check-upstream.mjs --max-age 12h`。有新版本时在回复中报告一次：当前锁定、最新版本、是否已有对应升级任务；不在当前任务中顺带升级。
 3. 判断任务类型：方案、工程、上游升级、维护；按下文对应流程执行。
 
@@ -13,11 +13,11 @@
 **先确定产品方案，再写代码。** 链路固定为：
 
 ```text
-产品方案 product/  →  功能清单 ID  →  用户确认 approval.md  →  迭代文档 iterations/NNN  →  工程 engineering/  →  验证证据  →  功能状态更新
+产品大纲 outline.md  →  功能 ID  →  功能设计 features/  →  用户确认 approval.md  →  迭代文档 iterations/NNN  →  工程 engineering/  →  验证证据  →  功能状态更新
 ```
 
-- **产品方案**（`product/brief.md` 为统一入口，专题文件为细节）定义完整需求、交互、数据归属、权限与验收。可见行为、数据归属、权限及交付范围的改变，先改方案并获得用户确认。
-- **功能清单**（`product/features.md`）是功能 ID、分期与状态的唯一来源。新增功能先分配 ID；状态只能凭真实证据推进（待细化 → 待对齐 → 可开发 → 开发中 → 待验收 → 已验收）。
+- **产品大纲**（`product/outline.md`）是第一层：定位、用户、支柱、分期和**功能清单**。功能清单是功能 ID、阶段与状态的唯一来源；新增功能先在这里分配 ID，状态只能凭真实证据推进（待细化 → 待对齐 → 可开发 → 开发中 → 待验收 → 已验收）。
+- **功能设计**（`product/features/`，按[写法规范](product/features/README.md#写法规范)）是第二层：每个模块一份，定义用户操作、规则、数据、实现约束与验收；不重复维护阶段和状态。可见行为、数据归属、权限及交付范围的改变，先改设计并获得用户确认。
 - **确认记录**（`product/approval.md`）写明确认日期、用户原话摘要、获准范围和待定事项。没有确认记录的范围不开始正式编程，包括脚手架、依赖和工程实验。研究、方案编辑、任务整理和对齐 Demo 不受此限。
 - **迭代文档**（`iterations/NNN-主题.md`，按[模板](iterations/template.md)）每轮只定一个可观察的交付结果，列出关联的功能 ID 与 TASK 编号、实际执行的验证和剩余问题。`CHAT-01`、`HARNESS-04.1` 类为产品功能，`TASK-001` 类为执行任务，不混用。
 - **工程变更**必须能追溯到功能 ID：分支名和提交说明带 TASK 编号，迭代文档链接到代码位置。方案与实现不一致时，先改文档再改代码。

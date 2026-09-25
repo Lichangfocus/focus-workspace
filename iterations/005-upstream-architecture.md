@@ -4,7 +4,7 @@
 
 ## 目标与依据
 
-用户要求拉取最新 DeepSeek Harness 开源代码，核查现有界面，并设计个人桌面工作台的技术框架。对应[产品方案修订 5](../product/brief.md)和[首页 HOME-01～07](../product/home.md)。此次允许更新官方参考仓库与研究文档，不代表正式应用开发获准。
+用户要求拉取最新 DeepSeek Harness 开源代码，核查现有界面，并设计个人桌面工作台的技术框架。对应[产品方案修订 5](../product/outline.md)和[首页 HOME-01～07](../product/features/workbench.md)。此次允许更新官方参考仓库与研究文档，不代表正式应用开发获准。
 
 ## 交付
 
