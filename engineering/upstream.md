@@ -36,9 +36,9 @@
 2. 将 `engineering/apps/desktop/package.json` 中全部 `@deepseek-ai/*` 改为同一目标版本，`npm install` 更新锁文件。
 3. 复核「本地补丁」表：构建和隔离启动会自动应用补丁，版本或代码锚点不符时停止；先判断补丁是否仍需要，再更新或删除。
 4. `npm test`、`npm run typecheck`、`npm run build`。
-5. `npm run dev:host` + `npm run verify:host`（隔离账号，不调用付费模型）。
+5. `npm run dev:host` + `npm run verify:host`（隔离账号，不调用付费模型）；重启 `dev:host` 后再跑 `npm run verify:restart`，确认版本、默认与旧会话在重启后保持。
 6. 用真实模型跑一次最小任务，覆盖对话、工具调用、审批和模式发布。
-7. `npm run package` 打包，在副本账号上启动，确认旧会话可读。
+7. 打包，在副本账号上启动，确认旧会话可读（`npm run verify:restart`）。打包时用 `--config.directories.output` 指定新目录，不覆盖正在使用的 `dist/mac-arm64`。
 8. 更新本页「当前锁定」与「升级记录」，合并后打 `checkpoint/dsh-<版本>` 标签。
 
 任一步失败：保留分支，记录失败原因与阻塞项，`main` 不变。
@@ -47,8 +47,23 @@
 
 | 补丁 | 原因 | 上游跟进 | 每次升级 |
 | --- | --- | --- | --- |
-| `apps/desktop/scripts/patch-creator.mjs` | 固定版多个创造 preset 重复注册 Host 检查 provider | 上游 #4742 已修复（0.1.7） | 升级到 0.1.7 时删除补丁与 `inspect-leases.mjs` |
-| `apps/desktop/scripts/brand-upstream.mjs` | 上游 Client 未开放首页标语 slot | 0.1.7 仍未开放，待提交上游 issue/PR | 升级时更新版本检查并确认两处文案仍可替换 |
+| `apps/desktop/scripts/brand-upstream.mjs` | 上游 Client 未开放首页标语 slot | 0.1.7-rc.2 仍未开放，待提交上游 issue/PR（TASK-033） | 升级时更新版本检查并确认两处文案仍可替换；0.1.7-rc.2 已复核 |
+
+已删除：`apps/desktop/scripts/patch-creator.mjs` 与 `plugin/inspect-leases.mjs`（多个创造 preset 重复注册 Host 检查 provider），上游 #4742 在 0.1.7 修复，随 [迭代 019](../iterations/019-dsh-017-migration.md) 删除。
+
+### 依赖的上游接口
+
+以下不是补丁，而是产品依赖的公开接口；升级时逐项复核。
+
+| 接口 | 用途 |
+| --- | --- |
+| `agentPresets.register(definition)` / 返回的 disposer | 注册模式版本；产品持有 disposer |
+| `agentPresets.readDocument(id)` | 读取官方 preset 的插件行，作为版本定义的基础 |
+| `agentPresets.resolve(id)`、`defaultId`、`composedPreset(ctx)` | 激活诊断、账号默认、识别会话所用版本 |
+| `settings.update('agent-preset-registry', {selectedDefault})` | 写账号默认 |
+| `sessionController.create/inspect/list/rename/prompt`、`workspaceController.create` | 检查会话、试跑会话、观测 |
+| `tool/result` 事件的 `message.isError` | 统计工具失败 |
+| `settings.yaml` 旧 `agent-presets.default` 段 | 仅用于从 alpha.5 迁移默认模式；DSH 启动后把该文件改名为 `settings.yaml.imported` |
 
 ### 升级记录
 
@@ -56,6 +71,7 @@
 | --- | --- | --- | --- |
 | 2026-09-20 | — → 0.1.6-alpha.2 | 首次接入 | [迭代 008](../iterations/008-desktop-alpha.md) |
 | 2026-09-25 | 0.1.6-alpha.2 → 0.1.7-rc.2 | 已评估，**有破坏性变化**，升级需重构模式发布；计划见[迭代 018](../iterations/018-harness-p1-plan.md) | [评估](#017-rc2-评估2026-09-25) |
+| 2026-09-26 | 0.1.6-alpha.2 → 0.1.7-rc.2 | **已升级**：模式发布改为运行时注册，alpha.5 版本迁移，删除 `patch-creator`；隔离账号验证通过，真实账号待迁移；真实模型最小任务未执行 | [迭代 019](../iterations/019-dsh-017-migration.md) |
 
 ## 0.1.7-rc.2 评估（2026-09-25）
 
@@ -71,7 +87,7 @@
 | 仍缺的能力 | 创建会话时仍不能指定模型与权限；没有按步骤返回完整模型请求的公开接口 |
 | 安全修复 | 本次未发现需要紧急升级的安全修复 |
 
-未验证项：各 preset 实际工具数量；`register()` 按调用方 `baseUrl` 解析子插件包名在打包应用中是否正常；大量产品 preset 出现在官方选择器中的体验；构建后 Client 文案替换是否仍可行。
+未验证项已在[迭代 019](../iterations/019-dsh-017-migration.md#技术验证结论)核实：四个内置 preset 实际工具数为标准 26、PTC 26、极简 1、创造 29；产品注册时把 `baseUrl` 设为应用内插件位置，打包应用中子插件包名和创造 Skill 路径都能解析；官方选择器会列出全部已注册版本（与 alpha.5 相同，待第 2 步处理）；构建后两处首页标语替换仍生效。
 
 ## 当前源码参考
 
@@ -80,6 +96,7 @@
 - 拉取日期：2026-09-20；同步本次获取的 `origin/master`，没有推送。
 - 当前提交：`ddefc45fbc7f8e46dd73185e68295696d1297887`。
 - 精确标签：`dsh-v0.1.6-alpha.2`。
+- 2026-09-25 另行获取标签 `dsh-v0.1.7-rc.2`；本地 HEAD 未移动，0.1.7 源码用 `git show dsh-v0.1.7-rc.2:<path>` 只读查阅。
 - 提交日期：2026-09-17 21:19:19 +08:00。
 - 原参考提交：`b150a551b8d465e31e418e1b2eaf5e79bbb7d28e`，标签 `dsh-v0.1.1-rc.2`，首次记录于 2026-09-10。
 
@@ -98,16 +115,16 @@
 | [Connection](https://github.com/deepseek-ai/deepseek-harness/blob/ddefc45fbc7f8e46dd73185e68295696d1297887/packages/client/connection/README.md)、[API 装配](https://github.com/deepseek-ai/deepseek-harness/blob/ddefc45fbc7f8e46dd73185e68295696d1297887/packages/api/remotes/README.md) | 当前 GUI 使用 Typert Remote；旧 apiproxy 路径已移除；新业务接口需要显式装配 |
 | [Schedule](https://github.com/deepseek-ai/deepseek-harness/blob/ddefc45fbc7f8e46dd73185e68295696d1297887/packages/schedule/schedule/README.md)、[重复规则](https://github.com/deepseek-ai/deepseek-harness/blob/ddefc45fbc7f8e46dd73185e68295696d1297887/docs/subsystems/schedule.md) | 持久化会话提醒，冷会话不执行，重复间隔至少 300 秒，无日历重复规则 |
 | [TypeScript SDK](https://github.com/deepseek-ai/deepseek-harness/blob/ddefc45fbc7f8e46dd73185e68295696d1297887/packages/sdk/client/README.md) | stdio 通道仍缺少中途取消、服务端交互请求，不适合作为完整桌面主通道 |
-| [会话格式](https://github.com/deepseek-ai/deepseek-harness/blob/ddefc45fbc7f8e46dd73185e68295696d1297887/docs/session-format-status.md) | 当前 Session 格式 V3，升级与代码回退须考虑数据兼容性 |
+| [会话格式](https://github.com/deepseek-ai/deepseek-harness/blob/ddefc45fbc7f8e46dd73185e68295696d1297887/docs/session-format-status.md) | 该提交时 Session 格式为 V3；0.1.7 起为 V4（单向迁移），升级与代码回退须考虑数据兼容性 |
+
+## 当前锁定
+
+`@deepseek-ai/dsh@0.1.7-rc.2` 与 `@deepseek-ai/dsh-mcp-client@0.1.7-rc.2`（2026-09-26 起，[迭代 019](../iterations/019-dsh-017-migration.md)），依赖树由 `apps/desktop/package-lock.json` 固定。正式 0.1.7 发布后再升级并复验。
 
 ## 接入状态
 
-桌面预览版已接入 npm 正式发布包 `@deepseek-ai/dsh@0.1.6-alpha.2` 与同版本 MCP Client，依赖树由 `apps/desktop/package-lock.json` 固定。没有修改上游源码；产品壳、Host/Client 插件与启动补丁由独立产品仓库维护。
+桌面预览版接入 npm 发布包 `@deepseek-ai/dsh` 与同版本 MCP Client，版本见上方“当前锁定”。没有修改上游源码；产品壳、Host/Client 插件与启动补丁由独立产品仓库维护。
 
 Electron 固定 43.2.0，Node 固定 24.19.0 并随包分发。DSH 的原生加载器不支持该 Electron 小版本内嵌 Node，因此内核使用独立 Node 子进程。已验证包内启动和 Harness 装配，真实模型及完整任务验收待配置密钥后进行，见[迭代 008](../iterations/008-desktop-alpha.md)。
 
 后续升级必须记录前后版本、保存数据备份，验证启动、插件加载、流式任务、审批、提问、取消及恢复。
-
-## alpha.5 兼容补丁
-
-固定版 `dsh-tool-cordis@0.1.6-alpha.2` 在多创造 preset 并存时重复注册 Host 检查 provider。`scripts/patch-creator.mjs` 在构建和隔离 Host 启动时应用精确版本补丁，公共 provider 使用 Host 引用计数，工具保持 scoped；实现位于 `plugin/inspect-leases.mjs`，生命周期及失败回滚有独立测试。没有修改父仓库源码；升级依赖需审阅此补丁。

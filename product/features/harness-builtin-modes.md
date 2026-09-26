@@ -2,7 +2,7 @@
 
 > 所属：[产品大纲](../outline.md) · 支柱一「灵活且自进化的 Harness」（参考资料） · 功能 ID：HARNESS-04.x 的上游依据 · 功能项与进度见[模式管理](harness-modes.md#功能项与进度)。
 
-核查基线：本产品安装的 `@deepseek-ai/dsh-agent-presets@0.1.6-alpha.2`，2026-09-23。这里说明该固定版本的实际装配，不将上游未来能力或产品设计当作已交付功能。自定义模式设计见[模式管理方案](harness-modes.md)。
+核查基线：本产品安装的 `@deepseek-ai/dsh-agent-presets@0.1.6-alpha.2`，2026-09-23；2026-09-26 升级到 DSH 0.1.7-rc.2 后复核，四种模式的插件行不变（仅创造模式的插件管理条件与创造 Skill 位置随包调整），实际工具数为标准 26、PTC 26、极简 1、创造 29。这里说明该固定版本的实际装配，不将上游未来能力或产品设计当作已交付功能。自定义模式设计见[模式管理方案](harness-modes.md)。
 
 ## 模式决定什么
 
@@ -58,8 +58,8 @@ PTC 表示程序化工具调用。用户依然用自然语言提需求，代码�
 
 ## 本地依据
 
-- 安装依赖的 `dsh-agent-presets/presets/{standard,ptc,minimal,cordis}/agent.cordis.yml`：四种模式的实际插件与配置。
-- 安装依赖的 `dsh-agent-presets/README.md`：preset 的作用域挂载、版本及空会话切换规则。
+- 安装依赖的 `dsh-web-app/presets/{standard,ptc,minimal,cordis}.patch.yml`：四种模式的实际插件与配置（0.1.7 起；0.1.6 为 `dsh-agent-presets/presets/*/agent.cordis.yml`）。
+- 安装依赖的 `dsh-agent-preset-registry/README.md`、`dsh-agent-preset/README.md`：preset 的注册、修订保留及空会话切换规则（0.1.7 起）。
 - 安装依赖的 `dsh-agent-tool-presentation/README.md`：`native`、`ptc`、`both` 的工具呈现与运行时依赖。
 - 安装依赖的 `dsh-plugin-manager/README.md`：插件管理的 profile 影响范围与授权要求。
 

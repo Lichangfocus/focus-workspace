@@ -8,7 +8,7 @@
 
 产品底层同时服务两个目标：日常使用方便，以及从真实任务持续改进。日常助手沿用当前 Electron、React Client、DSH Host 与官方会话通道；自进化在其上增加任务证据、反馈、候选、验证与采用记录，优先用插件和既有服务扩展，不修改执行循环。
 
-当前实现使用独立薄桌面壳，固定 Electron 43.2.0、Node 24.19.0 和 DSH 0.1.6-alpha.2。产品配置为原子 JSON，DSH 保存会话事实；SQLite 等存储按实际查询需求引入。详细对象、版本冲突、隔离验证及实现次序以[自进化底层设计](evolution-foundation.md)为唯一来源。
+当前实现使用独立薄桌面壳，固定 Electron 43.2.0、Node 24.19.0 和 DSH 0.1.7-rc.2（2026-09-26 起；此前为 0.1.6-alpha.2）。产品配置为原子 JSON，DSH 保存会话事实；SQLite 等存储按实际查询需求引入。详细对象、版本冲突、隔离验证及实现次序以[自进化底层设计](evolution-foundation.md)为唯一来源。
 
 ```mermaid
 flowchart LR

@@ -24,7 +24,8 @@
 | [015](015-mode-editor.md) | 模式编辑与受控改进 | alpha.5 交付并完成真实样例验收 |
 | [016](016-open-source-and-upstream.md) | 开源发布与上游跟进机制 | 完成 |
 | [017](017-outline-revision-13.md) | 产品大纲修订 13 与文档分层 | 定位已确认，新增项待确认 |
-| [018](018-harness-p1-plan.md) | 支柱一 Harness 底座 P1 开发计划 | 计划待确认 |
+| [018](018-harness-p1-plan.md) | 支柱一 Harness 底座 P1 开发计划 | 已确认，第 1 步完成 |
+| [019](019-dsh-017-migration.md) | 迁移到 DSH 0.1.7-rc.2（018 第 1 步） | 隔离账号验证通过，真实账号待迁移 |
 
 插件补充见[004 首页快捷方式与定时任务小组件](004-home-widgets.md)。
 

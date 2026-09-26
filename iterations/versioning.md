@@ -81,3 +81,9 @@
 开发前源码：`../.backups/focus-workspace-before-alpha5-20260923.tar.gz`；最终源码：`../.backups/focus-workspace-alpha5-20260923.tar.gz`，均配套 SHA-256。旧应用完整保留于 `../.backups/focus-workspace-alpha4-before-modes-20260923/Focus Workspace.app`。最终包位于桌面工程 `dist/mac-arm64/Focus Workspace.app`。源码归档已在临时目录展开核对关键文件，不包含用户会话、密钥、依赖或运行时二进制。
 
 数据 schema 2 与 alpha.4 不兼容；回退应用时需另存当前数据，再恢复 schema 1 备份，详见桌面 README。当前仍没有 Git 提交或远端；版本恢复依赖这些归档与独立应用包。
+
+## alpha.6 · DSH 0.1.7 迁移检查点（2026-09-26）
+
+源码：合并到 `main` 后打标签 `checkpoint/dsh-0.1.7-rc.2`；升级前的 `main` 即 alpha.5 源码。应用包：alpha.5 从 `main` 重新打包放回桌面工程 `dist/mac-arm64/`，另存 `dist/alpha5-rollback/`；alpha.6 位于 `dist/alpha6-dsh017/`。测试账号迁移前的归档为 `.local/modes-alpha5.before-017.tar.gz`（配 SHA-256）和 `.local/test-account.before-017.tar.gz`，不入库。
+
+会话格式从 v3 单向迁移到 v4，alpha.5 读不了迁移后新增的内容。回退应用时同时恢复升级前的账号备份，详见[迭代 019](019-dsh-017-migration.md#数据迁移说明)。真实账号尚未迁移。
