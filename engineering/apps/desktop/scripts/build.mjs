@@ -1,4 +1,3 @@
-import './patch-creator.mjs';
 /** Compile the out-of-tree client factory consumed by the official Web module loader. */
 import './brand-upstream.mjs';
 import {build} from 'esbuild';

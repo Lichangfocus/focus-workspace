@@ -1,4 +1,3 @@
-import './patch-creator.mjs';
 /** Isolated official-profile launch for reproducible product integration checks. */
 import {spawn} from 'node:child_process';
 import {mkdir,writeFile} from 'node:fs/promises';

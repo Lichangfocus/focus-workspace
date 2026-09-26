@@ -1,9 +1,12 @@
 /** Authenticated account-local mode editor; DSH retains execution and persistence ownership. */
-import {readFile,writeFile,mkdir,cp,lstat,realpath,readdir} from 'node:fs/promises';
-import {join,dirname,isAbsolute} from 'node:path';
+import {readFile,mkdir,cp,lstat,realpath,readdir} from 'node:fs/promises';
+import {join,isAbsolute,relative} from 'node:path';
+import {createRequire} from 'node:module';
 import {randomUUID} from 'node:crypto';
 import {z} from 'zod';
-import {Draft,defaults,KINDS,GROUPS,composePreset,presetMetadata} from './config.mjs';
+import {parse as parseYaml} from 'yaml';
+import {Draft,defaults,KINDS,GROUPS,composePlugins,parseRows} from './config.mjs';
+import {presetStore,migrateLegacyDirectories,Record} from './presets.mjs';
 import {State,migrate,freshMode,modeById,assertRevision,publishedConfig,ownsPreset,difference,record,adoptCandidate} from './modes.mjs';
 import {readJson,writeJson,serialQueue} from './store.mjs';
 export const inject=['webServer','connection','agentPresets','settings','sessionController','agents','tools','skills','pluginInventory','workspaceController'];
@@ -11,24 +14,62 @@ const address=z.object({modeId:z.string().min(1).max(160)});const revision=addre
 const note=z.string().trim().min(1).max(12000);
 const actualPreset=inspection=>inspection.events.filter(e=>e.type==='agent-preset/selected').at(-1)?.data.agentPreset??inspection.meta.agentPreset;
 /** Summarize recorded evidence without exposing full prompts or tool arguments to the overview. */
-export function observeSession(inspection){const events=inspection.events;const headers=events.filter(e=>e.type==='request/header');const results=events.filter(e=>e.type==='tool/result');return {presetId:actualPreset(inspection),eventCount:events.length,model:headers.at(-1)?.data.header.config.model??null,provider:headers.at(-1)?.data.header.config.provider??null,toolCalls:results.length,toolErrors:results.filter(e=>e.data.error||e.data.message.content?.some(b=>b.isError)).length,lastOutcome:events.filter(e=>e.type==='turn/end').at(-1)?.data.reason??null};}
+export function observeSession(inspection){const events=inspection.events;const headers=events.filter(e=>e.type==='request/header');const results=events.filter(e=>e.type==='tool/result');return {presetId:actualPreset(inspection),eventCount:events.length,model:headers.at(-1)?.data.header.config.model??null,provider:headers.at(-1)?.data.header.config.provider??null,toolCalls:results.length,toolErrors:results.filter(e=>e.data.error||e.data.message?.isError===true).length,lastOutcome:events.filter(e=>e.type==='turn/end').at(-1)?.data.reason??null};}
+const DSH_VERSION=JSON.parse(await readFile(createRequire(import.meta.url).resolve('@deepseek-ai/dsh/package.json'),'utf8')).version;
+const DESCRIPTION='Focus Workspace 固定版本；已有对话保持其实际配置。';
+/** Settings namespace whose volatile `selectedDefault` is the account default preset. */
+const REGISTRY='agent-preset-registry';
+/** Read the alpha.5 default that DSH 0.1.6 stored in the retired `settings.yaml` section. */
+async function legacyDefault(home){for(const name of ['settings.yaml','settings.yaml.imported']){try{return parseYaml(await readFile(join(home,name),'utf8'))?.['agent-presets']?.default??null;}catch(error){if(error.code!=='ENOENT')throw error;}}return null;}
 /** Register serialized mutations with optimistic draft revisions; snapshots never activate a model. */
 export async function apply(ctx){
  const home=process.env.DSH_HOME;if(!home)throw Error('Workbench requires account-specific DSH_HOME');
- const data=join(home,'workbench'),file=join(data,'state.json'),journal=join(data,'default-transition.json');await mkdir(data,{recursive:true,mode:0o700});
- const current=()=>ctx.settings.get('agent-presets')?.default??ctx.agentPresets.defaultId;
+ const data=join(home,'workbench'),file=join(data,'state.json'),journal=join(data,'default-transition.json'),migrations=join(data,'migrations.json');await mkdir(data,{recursive:true,mode:0o700});
+ const current=()=>ctx.agentPresets.defaultId;
+ const setDefault=presetId=>ctx.settings.update(REGISTRY,{selectedDefault:presetId});
+ const store=presetStore(data);
+ // Session ownership compares canonical paths; resolve symlinked parents (for example /var on macOS) once.
+ const workspacePath=await realpath(process.env.DSH_WORKBENCH_WORKSPACE);
+ // Child package names and creator `baseUrl` expressions resolve from the application install, not the account profile directory.
+ const scoped=ctx.extend({baseUrl:import.meta.url});const live=new Map();
+ ctx.effect(()=>async()=>{for(const dispose of [...live.values()].reverse())await dispose();live.clear();},'workbench: registered mode versions');
+ async function register(record){if(live.has(record.id))return;live.set(record.id,await scoped.agentPresets.register(store.definition(Record.parse(record))));}
+ async function unregister(id){const dispose=live.get(id);live.delete(id);if(dispose)await dispose();}
+ const legacyDefaultId=await legacyDefault(home);
  const old=await readJson(file,null);if(old?.schema===1)await writeJson(join(data,'state.schema1.backup.json'),old);
- let state=migrate(old,current());if(old?.schema!==2)await writeJson(file,state);
- // Complete an interrupted default-setting operation before exposing the management API.
- const pending=await readJson(journal,null);if(pending){state=State.parse(pending.state);await writeJson(file,state);await ctx.settings.update('agent-presets',{default:pending.presetId,modeSelectionEnabled:true});await writeJson(journal,null);}
- const queue=serialQueue();const runningAgent=id=>ctx.agents.list().find(a=>ctx.agentPresets.composedPreset(a.ctx)===id);
- async function commit(next,defaultId){State.parse(next);if(defaultId!==undefined)await writeJson(journal,{presetId:defaultId,state:next});await writeJson(file,next);state=next;if(defaultId!==undefined){await ctx.settings.update('agent-presets',{default:defaultId,modeSelectionEnabled:true});await writeJson(journal,null);}}
- async function inspectPreset(id){let agent=runningAgent(id);if(!agent){const created=await ctx.sessionController.create({cwd:process.env.DSH_WORKBENCH_WORKSPACE,agentPreset:id});agent=ctx.agents.get(created.sessionId);await ctx.sessionController.rename({sessionId:created.sessionId,title:`装配检查 · ${id}`});}if(!agent)throw Error('未创建可检查的实例');const tools=[...ctx.tools.view(agent).visible.values()].map(t=>({name:t.name,description:t.description??'',source:t.name.startsWith('mcp__')?'MCP':'DSH'}));const skills=await ctx.skills.list({scope:agent,cwd:process.env.DSH_WORKBENCH_WORKSPACE});return {presetId:id,sessionId:agent.id,tools,skills:skills.map(s=>({name:s.name,description:s.description}))};}
- async function snapshot(){return {account:await readJson(join(home,'account.json'),{name:'本地账号'}),dshVersion:'0.1.6-alpha.2',activeId:current(),state,kinds:KINDS,groups:GROUPS};}
+ let state=migrate(old,legacyDefaultId??current());if(old?.schema!==2)await writeJson(file,state);
+ // Convert alpha.5 directories, then register every stored version before any Session resumes against it.
+ const creator=parseRows((await ctx.agentPresets.readDocument('cordis')).content).find(r=>r.id==='skill-filesystem')?.config?.customSkillDirs??[];
+ const migrated=await migrateLegacyDirectories({home,data,store,creatorSkillDirs:creator,dshVersion:DSH_VERSION});
+ // One unreadable or rejected record must not block the other versions or the management API; it stays listed as a startup error.
+ const startupErrors=[];const started=Date.now();let records=[];
+ try{records=await store.list();}catch(error){startupErrors.push({presetId:null,message:String(error.message??error)});}
+ for(const record of records){try{await register(record);}catch(error){startupErrors.push({presetId:record.id,message:String(error.message??error)});ctx.logger.warn('workbench: version %s was not registered: %s',record.id,error.message??error);}}
+ ctx.logger.info('workbench: registered %d mode versions in %dms (%d migrated from alpha.5)',records.length,Date.now()-started,migrated.length);
+ const queue=serialQueue();
+ // Settings writes edit the profile through the Loader, which settles only after this plugin returns;
+ // the default-related recovery therefore runs as the first queued operation, ahead of every management call.
+ void queue(async()=>{await ctx.root.loader.await();
+  const done=await readJson(migrations,{});
+  if(!done.legacyDefault){if(legacyDefaultId&&legacyDefaultId!==current()&&(live.has(legacyDefaultId)||KINDS.some(k=>k.id===legacyDefaultId)))await setDefault(legacyDefaultId);await writeJson(migrations,{...done,legacyDefault:true,migratedPresets:migrated.length});}
+  // Complete an interrupted default-setting operation.
+  const pending=await readJson(journal,null);if(pending){state=State.parse(pending.state);await writeJson(file,state);await setDefault(pending.presetId);await writeJson(journal,null);}
+ }).catch(error=>ctx.logger.error('workbench: default recovery failed: %s',error.message??error));const runningAgent=id=>ctx.agents.list().find(a=>ctx.agentPresets.composedPreset(a.ctx)===id);
+ async function commit(next,defaultId){State.parse(next);if(defaultId!==undefined)await writeJson(journal,{presetId:defaultId,state:next});await writeJson(file,next);state=next;if(defaultId!==undefined){await setDefault(defaultId);await writeJson(journal,null);}}
+ async function inspectPreset(id){let agent=runningAgent(id);if(!agent){const created=await ctx.sessionController.create({cwd:workspacePath,agentPreset:id});agent=ctx.agents.get(created.sessionId);await ctx.sessionController.rename({sessionId:created.sessionId,title:`装配检查 · ${id}`});}if(!agent)throw Error('未创建可检查的实例');const tools=[...ctx.tools.view(agent).visible.values()].map(t=>({name:t.name,description:t.description??'',source:t.name.startsWith('mcp__')?'MCP':'DSH'}));const skills=await ctx.skills.list({scope:agent,cwd:workspacePath});return {presetId:id,sessionId:agent.id,tools,skills:skills.map(s=>({name:s.name,description:s.description}))};}
+ async function snapshot(){return {account:await readJson(join(home,'account.json'),{name:'本地账号'}),dshVersion:DSH_VERSION,activeId:current(),state,kinds:KINDS,groups:GROUPS,startupErrors};}
  async function skillSources(draft){const result=[];for(const skill of draft.skills.filter(s=>s.enabled)){if(!isAbsolute(skill.path))throw Error('Skill 目录必须是绝对路径');const path=await realpath(skill.path);if(!(await lstat(path)).isDirectory())throw Error('Skill 来源必须为目录');if(!(await readFile(join(path,'SKILL.md'),'utf8')).startsWith('---'))throw Error('SKILL.md 需要名称与描述元信息');async function check(dir){for(const name of await readdir(dir)){const child=join(dir,name),stat=await lstat(child);if(stat.isSymbolicLink())throw Error('Skill 包内不支持符号链接');if(stat.isDirectory())await check(child);}}await check(path);result.push({...skill,path});}return result;}
- async function build(draft,label){const sources=await skillSources(draft);const id=`wb-${Date.now()}-${randomUUID().slice(0,8)}`;await ctx.agentPresets.copy(draft.kind,id,label);const preset=await ctx.agentPresets.resolve(id),dir=dirname(preset.path);try{const roots=[];for(const skill of sources){const root=join(dir,'workbench-skills',skill.id);await mkdir(root,{recursive:true,mode:0o700});await cp(skill.path,join(root,skill.id),{recursive:true,errorOnExist:true,force:false});roots.push(root);}const standard=await ctx.agentPresets.resolve('standard');await writeFile(preset.path,composePreset(await readFile(preset.path,'utf8'),draft,roots,await readFile(standard.path,'utf8')),{mode:0o600});await writeFile(join(dir,'preset.yml'),presetMetadata(label),{mode:0o600});const inspection=await inspectPreset(id);for(const mcp of draft.mcp.filter(x=>x.enabled))if(!inspection.tools.some(t=>t.name.startsWith(`mcp__${mcp.id}__`)))throw Error(`MCP ${mcp.id} 未发现可用工具`);return {id,inspection};}catch(error){try{await ctx.agentPresets.remove(id);}catch(cleanup){throw Error(`${error.message}；检查目录清理失败：${cleanup.message}`);}throw error;}}
+ async function readRows(kind){return parseRows((await ctx.agentPresets.readDocument(kind)).content);}
+ /** Store, register and inspect a new immutable version; failure leaves no registered or stored definition. */
+ async function build(draft,label){const sources=await skillSources(draft);const id=`wb-${Date.now()}-${randomUUID().slice(0,8)}`;const base=await readRows(draft.kind);const plugins=composePlugins(base,draft,sources.length,draft.kind==='standard'?base:await readRows('standard'));
+ try{const skillRoots=[];for(const skill of sources){const root=join(store.skillDir(id),skill.id);await mkdir(root,{recursive:true,mode:0o700});await cp(skill.path,join(root,skill.id),{recursive:true,errorOnExist:true,force:false});skillRoots.push(relative(data,root));}
+ const record={schema:1,id,name:label,description:DESCRIPTION,kind:draft.kind,createdAt:new Date().toISOString(),dshVersion:DSH_VERSION,origin:'published',plugins,skillRoots};
+ await register(record);const {broken}=await ctx.agentPresets.resolve(id);if(broken)throw Error(`加载检查失败：${broken}`);
+ const inspection=await inspectPreset(id);for(const mcp of draft.mcp.filter(x=>x.enabled))if(!inspection.tools.some(t=>t.name.startsWith(`mcp__${mcp.id}__`)))throw Error(`MCP ${mcp.id} 未发现可用工具`);
+ await store.save(record);return {id,inspection};}
+ catch(error){try{await unregister(id);await store.discard(id);}catch(cleanup){throw Error(`${error.message}；清理未发布版本失败：${cleanup.message}`);}throw error;}}
  async function modeSession(mode,sessionId){const result=await ctx.sessionController.inspect(sessionId);if(!ownsPreset(mode,actualPreset(result)))throw Error('来源会话不属于这个模式');return result;}
- async function openableSession(presetId,sessionId){const {workspace}=await ctx.workspaceController.create({path:process.env.DSH_WORKBENCH_WORKSPACE});return ctx.sessionController.create({workspaceId:workspace.workspaceId,agentPreset:presetId,...(sessionId?{sessionId}:{})});}
+ async function openableSession(presetId,sessionId){const {workspace}=await ctx.workspaceController.create({path:workspacePath});return ctx.sessionController.create({workspaceId:workspace.workspaceId,agentPreset:presetId,...(sessionId?{sessionId}:{})});}
  const actions={
  snapshot:async()=>snapshot(),
  start:async(payload)=>{const p=address.strict().parse(payload),mode=modeById(state,p.modeId);if(!mode.current||mode.archived)throw Error('先发布并恢复模式');const created=await openableSession(mode.current);return {...await snapshot(),generatedSessionId:created.sessionId};},

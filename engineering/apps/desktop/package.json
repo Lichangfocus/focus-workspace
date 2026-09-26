@@ -1,8 +1,9 @@
 {
   "name": "dsh-workbench",
   "productName": "Focus Workspace",
-  "version": "0.1.0-alpha.5",
+  "version": "0.1.0-alpha.6",
   "private": true,
+  "workspaces": [],
   "type": "module",
   "main": "electron/main.mjs",
   "description": "个人对话与 Harness 工作台",
@@ -13,11 +14,12 @@
     "package": "node scripts/bundle-runtime.mjs && npm run build && electron-builder --mac dir --arm64",
     "typecheck": "tsc --noEmit",
     "dev:host": "node scripts/dev-host.mjs",
-    "verify:host": "node scripts/verify-host.mjs"
+    "verify:host": "node scripts/verify-host.mjs",
+    "verify:restart": "node scripts/verify-restart.mjs"
   },
   "dependencies": {
-    "@deepseek-ai/dsh": "0.1.6-alpha.2",
-    "@deepseek-ai/dsh-mcp-client": "0.1.6-alpha.2",
+    "@deepseek-ai/dsh": "0.1.7-rc.2",
+    "@deepseek-ai/dsh-mcp-client": "0.1.7-rc.2",
     "yaml": "2.8.2",
     "zod": "4.3.6"
   },
